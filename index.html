@@ -3,11 +3,34 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>HTML5 Input Attributes</title>
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+		<style>
+			.input {
+				outline: 0;
+				border: 1px solid gray;
+			}
+			.input:hover {
+				background-color: #fafafa;
+			}
+			.input.focus {
+				box-shadow: 0 0 0 3px rgba(0, 0, 255, 0.4);
+			}
+			.input.empty {
+				border: 1px solid red;
+			}
+			/* empty인 상태에서 포커스 */
+			.input.empty-focus {
+				border: 1px solid red;
+				box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.4);
+			}
+		</style>
 	</head>
 	<body>
 		<form>
 			<div class="email">
 				<input
+					class="input"
 					type="email"
 					id="email"
 					name="email"
@@ -16,25 +39,89 @@
 				/>
 			</div>
 			<div class="password">
-				<input type="password" id="password" name="password" required />
+				<input
+					class="input"
+					type="password"
+					id="password"
+					name="password"
+					required
+				/>
 			</div>
 			<input type="submit" value="전송" />
 		</form>
 		<script>
-			const email = document.getElementById('email');
-			const password = document.getElementById('password');
+			(function () {
+				const email = document.querySelector('#email');
+				const password = document.querySelector('#password');
 
-			email.onfocus = function (e) {
-				console.log('onfocus');
-				email.style.outlineWidth = '2px';
-				email.style.outlineColor = '#adc9ff';
-			};
+				function setInput(dom) {
+					dom.classList.remove('focus');
+					dom.classList.remove('empty');
+					dom.classList.remove('empty-focus');
+				}
 
-			email.onblur = function (e) {
-				console.log('onblur');
-				email.style.borderWidth = '2px';
-				email.style.borderColor = '#ff0000';
-			};
+				function setEmpty(dom) {
+					dom.classList.remove('focus');
+					dom.classList.remove('empty');
+					dom.classList.remove('empty-focus');
+					dom.classList.add('empty');
+				}
+
+				function setEmptyFocus(dom) {
+					dom.classList.remove('focus');
+					dom.classList.remove('empty');
+					dom.classList.remove('empty-focus');
+					dom.classList.add('empty-focus');
+				}
+
+				function setFocus(dom) {
+					dom.classList.remove('focus');
+					dom.classList.remove('empty');
+					dom.classList.remove('empty-focus');
+					dom.classList.add('focus');
+				}
+
+				// email에 포커스 되었을 때
+				email.onfocus = function (e) {
+					if (email.classList.contains('empty')) {
+						// 2. 빨간 테두리 -> Focus : 핑크
+						// .input.empty -> .input.empty-focus
+						setEmptyFocus(email);
+					} else {
+						// 1. 회색 테두리 -> Focus : 파랑
+						// .input -> .input.focus
+						setFocus(email);
+					}
+				};
+
+				email.onblur = function (e) {
+					if (email.value.length === 0) {
+						// 1. 비어있는 값     -> Blur : 빨강
+						// length === 0 -> .input.empty
+						setEmpty(email);
+					} else if (email.value.length > 0) {
+						// 2.	비어있지 않은 값 -> Blur : 회색
+						// length > 0   -> .input
+						setInput(email);
+					}
+				};
+
+				email.oninput = function () {
+					if (email.classList.contains('empty-focus')) {
+						// 1. 핑크테두리 -> 한개 입력 : 회색
+						// .input.empty -> length === 1 -> .input
+						if (email.value.length === 1) {
+							setInput(email);
+						}
+					} else {
+						// 2. 회색테두리 -> 두개 이상 입력 : 파랑
+						// .input -> length > 1 -> .input.focus
+						if (email.value.length > 1) {
+							setFocus(email);
+						}
+					}
+				};
+			})();
 		</script>
 	</body>
 </html>
